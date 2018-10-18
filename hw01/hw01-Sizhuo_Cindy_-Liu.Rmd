@@ -1,0 +1,333 @@
+---
+title: "hw01"
+author: "Sizhuo (Cindy) Liu"
+date: "February 13, 2018"
+output: github_document
+---
+###2. Data Import
+```{r}
+library(readr)
+```
+
+####Create Vectors
+```{r}
+column_names <- c(
+  'symboling',
+  'normalized_losses',
+  'make',
+  'fuel_type',
+  'aspiration',
+  'num_of_doors',
+  'body_style',
+  'drive_wheels',
+  'engine_location',
+  'wheel_base',
+  'length',
+  'width',
+  'height',
+  'curb_weight',
+  'engine_type',
+  'number of cylinders',
+  'engine_size',
+  'fuel_system',
+  'bore',
+  'stroke',
+  'compression_ratio',
+  'horsepower',
+  'peak_rpm',
+  'city_mpg',
+  'highway_mpg',
+  'price'
+)
+col_types <- c(
+  'real',
+  'real',
+  'character',
+  'character',
+  'character',
+  'character',
+  'character',
+  'character',
+  'character',
+  'real',
+  'real',
+  'real',
+  'real',
+  'integer',
+  'character',
+  'character',
+  'integer',
+  'character',
+  'real',
+  'real',
+  'real',
+  'integer',
+  'integer',
+  'integer',
+  'integer',
+  'integer'
+)
+```
+
+####Import the csv File Using read.csv()
+```{r}
+csv.file <-read.csv(file = "imports-85.data",
+         col.names = column_names,
+         colClasses = col_types,
+                  na.strings = "?",
+         sep = ",",
+         header = FALSE
+         )
+csv.file
+```
+
+####Display the Structure of csv File
+```{r}
+str(csv.file)
+```
+
+####Import the csv File Using read_csv()
+```{r}
+csv_file <- read_csv(file = "imports-85.data",
+         col_names = column_names,
+         col_types = "ddcccccccddddiccicdddiiiii"
+)
+csv_file
+```
+
+####Display the Structure of csv_file
+```{r}
+str(csv_file)
+```
+
+###3. Technical Questions About Importing Data
+
+**If you don’t provide a vector of column names, what happens to the column names of the imported data when you simply invoke read.csv('imports-85.data')?**
+
+* The column names of the imported data are by default the name of the first term in each column. 
+
+**If you don’t provide a vector of column names, what happens to the column names of the imported data when you invoke read.csv('imports-85.data', header = FALSE)?**
+
+* The column names of imported data automatically becomes V1, V2, ... Vn.
+
+**When using the reading table functions, if you don’t specify how missing values are codified, what happens to the data type of those columns that contain '?', e.g. price or num_of_doors?**
+
+* If the codification of missing values is not specified, then the data type of the columns with missing values is displayed to be factor by default. 
+
+**Why is the data frame imported in the second option bigger (in terms of bytes) than the data frame imported in the first option?**
+
+* When we do not specify the data type in a data frame, by default, the system treats everything as factors and assigns each of them a number, which on average only takes up around 8 bytes (per number). However, once we specify the data type, some of the data will be treated as a character that is consisted of multiple letters that would take up much more than 8 bytes. Thus, specifying the data type increases the size of hte data frame in terms of bytes.
+
+**What happens to the data values if you convert dat as an R matrix?**
+
+* After converting the data frame to an R matrix, each and every data value is displayed in increasing order in each column. They are no longer concisely summarized in a table.  
+
+###4. Practice Base Plotting
+
+####Histogram of Price with Colored Bars
+```{r}
+hist(csv.file$price,col=c('blue','purple','red','green','yellow','grey','white','orange','pink'))
+```
+
+#####Description of the Histogram
+* The histogram showing the distribution of the prices of cars suggest that the majority of the cars on the list are on the cheaper side (around $100000 price). There is a large decrease in frequency when the price hits above $10000 (almost shrinked by half). Another obvious decrease in frequency is at the $20000 gap. The number of cars sold at the price of $50000 is significantly smaller than number of cars with prices in the range of $10000 and $20000. 
+
+####Boxplot of Horsepower in Horizontal Orientation
+```{r}
+boxplot(csv.file$horsepower, horizontal = TRUE, col = 'yellow', main = 'Boxplot of Horsepower in Horizontal Orientation')
+```
+
+#####Description of the Boxplot
+* The boxplot of the horsepower indicate that the average value of horsepower among all cars is between 90 and 100. The majority of the cars have a horsepower value etween 50 and around 180 but there are also a few cars whose horsepower value serve as outliers as they are significantly larger than most of the other values, with 288 being the largest value displayed. The middle 50% of the cars have a horsepower value between about 70 and about 120. 
+
+####Barplot of Frequency of body_style Arranged in Decreasing Order
+```{r}
+barplot(sort(table(csv.file$body_style),decreasing = TRUE),col = c('green','blue','purple','pink','red'), main = 'Barplot of Frequency of body_style Arranged in Decreasing Order')
+```
+
+#####Description of the Barplot
+* The barplot of frequency of body_style indicates that most of the cars listed in the data file have a body style of sedan and hatchback. There are significantly less cars with the body styles of wagon, hardtop, and convertible. 
+
+####stars() Plot of Vehicles
+```{r}
+stars(csv.file[csv.file$aspiration == 'turbo', c('wheel_base', 'length', 'width','height','price')], main = "Starplot of Vehicles with turbo aspiration")
+```
+
+#####Description of the Starplot
+* The starplot suggests that out of the cars with turbo aspiration, the ones with indexes 9, 68-71, 109-118, and 193-205 have large values in every single variable listed (wheel base, length, width, height, and price). Car #71 seems to have the largest average value across all variables. However, some cars such as those with indexes 24, 28, 80, and 120 have very low values in every category listed, and thus the shape of the star is significantly smaller than others. Particular cars such as car #106 has significantly higher value in one variable over the other and thus the star shape is distorted and the value distribution is unbalanced. 
+
+###5. Summaries
+
+#####What is the mean price of fuel_type gas cars? And what is the mean price of fuel_type diesel cars?
+* Answer: 12916.41 for gas cars and 15838.15 for diesel cars
+```{r}
+#mean price of fuel_type gas cars 
+mean(csv.file$price[which(csv.file[,4]=='gas')],na.rm=TRUE)
+```
+```{r}
+#mean price of fuel_type disel cars
+mean(csv.file$price[which(csv.file[,4]=='diesel')],na.rm=TRUE)
+```
+
+#####What is the make of the car with twelve num_of_cylinders?
+* Answer: Jaguar
+```{r}
+csv.file$make[which(csv.file[,16]=='twelve')]
+```
+
+#####What is the make that has the most diesel cars?
+* Answer: Peugot
+```{r}
+which.max(table(csv.file$make[csv.file[,4]=='diesel']))
+```
+
+#####What is the price of the car with the largest amount of horsepower?
+* Answer: The price of the largest is missing. The price of the second largest is 36000.
+```{r}
+omit.na <- na.omit(csv.file[c('price','horsepower')])
+omit.na$price[which.max(omit.na$horsepower)]
+#the value displayed is the second largest one as the largest has missing values
+```
+
+#####What is the bottom 10th percentile of city_mpg?
+* Answer: 17
+```{r}
+quantile(csv.file$city_mpg, 0.1)
+```
+
+#####What is the top 10th percentile of highway_mpg?
+* Answer: 38
+```{r}
+quantile(csv.file$highway_mpg, 0.9)
+#top 10th percentile = bottom 90th percentile
+```
+
+#####What is the median price of those cars in the bottom 10th percentile of city_mpg?
+* Answer: 32250
+```{r}
+median(na.omit(csv.file$price[csv.file$city_mpg<=quantile(csv.file$city_mpg, 0.1)]))
+```
+
+###6. Technical Questions About Data Frames
+
+**What happens when you use the dollar $ operator on a data frame, attempting to use the name of a column that does not exist?**
+
+* When we run the code, the output appears to be "NULL".
+
+**Which of the following commands fails to return the vector mpg which is a column in the built-in data rfame mtcars?**
+
+* The command "mtcars[ ,mpg]" fails to return the vector mpg.
+
+**Based on your answer for part (b), what is the reason that makes such command to fail?**
+
+* Such command fails because the bracket notation only allows inputs of the type "numeric" or "character". mpg without the quotation marks around is of neither type--it is treated as string. 
+
+**Can you include an R list as a “column” of a data frame? YES or NO, and why?**
+
+* Yes. Data frame is a special type of list and so it is of the same category as list. 
+
+**What happens when you apply as.list() to a data frame?**
+
+* After applying as.list(), each and every data value is listed uncategorized. The data type does not change.
+
+**Consider the command: abc <- as.list(mtcars). What function(s) can you use to convert the object abc into a data frame?**
+
+* I can use cba <- as.data.frame(abc) to convert the object back to a data frame. 
+* data.frame(abc)
+
+###7. Correlations of Quantitative Variables
+
+#####Compute a Matrix of Correlations Between Quantitative Variables
+```{r}
+#create a matrix of correlation
+cor(csv.file[,c(10:14,17,19:26)])
+```
+
+```{r}
+#remove all missing values (NA)
+qdat<- na.omit(subset(csv.file, select=c(10:14,17,19:26)))
+qdat.cor<- cor(qdat)
+qdat
+qdat.cor
+```
+
+#####Plotting Correlogram
+```{r}
+#install package in R console
+#install.packages("corrplot")
+#load package
+library('corrplot')
+```
+
+```{r}
+corrplot(qdat.cor, method = 'square', order = 'hclust', tl.srt=45, main = 'Correlogram Squares')
+corrplot(qdat.cor, method = 'pie', order = 'hclust', tl.srt=45, main = 'Correlogram Pie')
+```
+
+#####Comments on the Pattern of the Correlogram
+* The color distribution of the two correlograms suggest that the strongest positive correlations (other than the ones between themselves in the diagonal line), are between price, engine_size, and horsepower, and as well as between width, length, and curb_weight. 
+* city_mpg and highway-pmg have the strongest negative correlation with wheel_base, width, length, curb)weight, bore, horsepower, engine_size, and price. 
+* stroke, compression_ratio, peak_rpm, and height have very little correlation with any of the other variables. 
+
+###8. Principal Components Analysis (PCA)
+
+#####Run PCA
+```{r}
+#run PCA with prcomp()
+qdat_prcomp <- prcomp(qdat, scale. =TRUE)
+qdat_prcomp
+```
+
+
+```{r}
+#examine eigenvalues
+eigenvalues_qdat <- qdat_prcomp$sdev^2
+eigenvalues_qdat
+```
+
+```{r}
+#Proportion of Variation
+eigs2 <- eigenvalues_qdat
+eigs_perc2 <- 100 * eigs2 / sum(eigs2)
+eigs_cum2 <- cumsum(eigs_perc2)
+
+eigs_df2 <- data.frame(
+  eigenvalue2 = eigs2,
+  percentage = eigs_perc2,
+  'cumulative percentage' = eigs_cum2
+)
+
+print(round(eigs_df2, 4), print.gap = 2)
+
+barplot(eigenvalues_qdat[1:3], border = NA, las = 1, names.arg = paste('PC', 1:3), 
+        main = 'Bar-chart of eigenvalues2')
+```
+
+#####Plotting PCA Plot of Vehicles and PCA Plot of Variables
+
+```{r}
+#scatterplot of vehicles
+score_qdat <- qdat_prcomp$x
+plot(score_qdat [ ,1],score_qdat[ ,2],main='Scatterplot of Vehicles')
+```
+
+```{r}
+#scatterplot of variables
+loadings <- qdat_prcomp$rotation
+plot(loadings [,1],loadings[,2], main = 'Scatterplot of Variables')
+```
+
+```{r}
+#biplot of both vehicles and variables
+biplot(score_qdat, loadings)
+```
+
+#####Description of the Pattern
+* The scatterplot of vehicles suggest that the majority of the vehicles are not extreme to PC1 or PC2. 
+* The scatterplot of variables show that the majority of the vehicles are slightly more extreme to PC1. 
+* The biplot of the vehicles and the variables indicate that most of the points are concentrated in the center and thus are not extreme to either of PC1 or PC2. 
+
+
+
+
+

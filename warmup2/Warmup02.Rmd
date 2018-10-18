@@ -1,0 +1,166 @@
+---
+title: "Warmup 2"
+author: Sizhuo(Cindy) Liu
+date: February 6,2018
+output: github_document
+---
+###Getting the Data File
+```{r}
+load("/Users/sizhuoliu/nba2017-salary-points.RData")
+```
+###Data Processing
+
+* converting unit of salary
+```{r}
+salary_millions <- salary/1000000
+round(salary_millions,digits=2)
+```
+
+* Renaming factors
+```{r}
+position_fac<-factor(position,
+                     levels=c("C","SF","PF","SG","PG"),
+                     labels=c("center","small_fwd","power_fwd","shoot_guard","power_guard"))
+position_fac
+```
+####Quantitative Variable
+
+* Descriptive Statistics of Salary
+```{r}
+summary(salary)
+```
+```{r}
+#average:typical value
+mean(salary)
+#standard deviation:spread
+sd(salary)
+#minimum value
+min(salary)
+#maximum value 
+max(salary)
+#median value
+median(salary)
+#quartiles
+quantile(salary,c(0.25,0.5,0.75))
+```
+
+* Descriptive Statistics of Points
+```{r}
+#average:typical value
+mean(points)
+#standard deviation: spread
+sd(points)
+```
+
+* Graphs
+```{r}
+#Distribution
+hist(salary)
+hist(points)
+boxplot(salary)
+boxplot(points)
+```
+```{r}
+#kernel density plot
+plot(density(salary))
+plot(density(points))
+```
+
+**Description of Overall Patterns**
+
+* For both the plots for salary and for points, the density is the highest at the lower end, and gradually fade away as the salary/score increases. 
+* There are no striking deviations in either plot.
+
+####Qualitative Variable
+
+* Creating Factors
+```{r}
+#turn team into a R factor
+team_fac<-factor(team)
+team_fac
+```
+```{r}
+table(team_fac)
+frequency<-table(team_fac)
+relative_frequency<-frequency/441
+relative_frequency
+```
+###Scatterplot of Points and Salary
+
+* Scatterplot Color-coded Based on Team
+```{r}
+plot(points,salary_millions,col=team_fac)
+```
+
+* Scatterplot Color-coded Based on Position
+```{r}
+plot(points,salary_millions,col=position_fac)
+```
+
+###Correlation Between Points and Salary
+
+* Mean of points/Points
+```{r} 
+points_mean <- (1/441)*sum(points)
+points_mean
+```
+
+* Mean of Salary
+```{r}
+salary_mean <- (1/441)*sum(salary)
+salary_mean
+```
+
+* Variance of points/Points
+```{r}
+n <- length(player)
+points_var <- (1/(n-1))*sum((points-points_mean)^2)
+points_var
+```
+
+* Variance of Salary
+```{r}
+salary_var <- (1/(n-1))*sum((salary-salary_mean)^2)
+salary_var
+```
+
+* Standard Deviation of points/Points
+```{r}
+points_sd <-sqrt(points_var)
+points_sd
+```
+
+* Standard Deviation of Salary
+```{r}
+salary_sd <- sqrt(salary_var)
+salary_sd
+```
+
+* Covariance of points/Points and Salary
+```{r}
+points_salary_cov <- (1/(n-1))*sum((points-points_mean)*(salary-salary_mean))
+points_salary_cov
+```
+
+* Correlation Between points and Salary
+```{r}
+points_salary_corr <- points_salary_cov / ((points_sd)*(salary_sd))
+points_salary_corr
+```
+###Comments and Reflections
+
+* The one part that is relatively hard for me is plotting the graphs. Although we have already done that in labs, I found them difficult because I think that it is tricky to set up the graph in a way so that they are organized and easily understandable. 
+
+* The part that is relatively easy for me was calculating the mean, variance, standard deviation, etc. of the data. Since I know the formulas for calculating these things, it is very straightforward to apply the calculations in R. 
+
+* I needed help with this assignment as I was stuck on some parts such as using the sigma notation correctly. The issue was solved when I attended my GSI's office hour, where she offered hints to help me solve the problem. 
+
+* It took in total around 3 hours (mainly because I spent a very long time on one single part). 
+
+* The most time-consuming part was calculating the mean/sd/variance, etc. as I had to double check to make sure I got the right answers. 
+
+* The one thing that I think that I still haven't fully grasped is the idea of factor vs. general vectors. Although I know how to apply them, I still do not fully understand the reasoning behind using one as opposed to the other. 
+
+* The most frustrating part was figuring out how to use the sigma notation as I spent the most time on this and had to look for information online. 
+
+

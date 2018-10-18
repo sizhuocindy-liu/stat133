@@ -1,0 +1,173 @@
+---
+title: "hw04-Sizhuo(Cindy)-Liu"
+author: "Sizhuo (Cindy) Liu"
+date: "April 10, 2018"
+output: github_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, error = TRUE, fig.path = '../images/')
+```
+
+```{r}
+# load packages
+library(ggplot2)
+library(stringr)
+```
+
+```{r}
+source(file='../code/archive-functions.R')
+```
+
+### 1.4) Archive of 'stringr'
+```{r}
+raw_data <- read_archive('stringr')
+clean_data <- clean_archive(raw_data)
+plot_archive(clean_data)
+```
+
+### 1.5) Archives of "dplyr", "ggplot2", "XML", and "knitr"
+```{r}
+# CRAN archive table for 'ggplot2'
+ggplot2 <- clean_archive(read_archive('ggplot2'))
+ggplot2
+write.csv(ggplot2, file = '../data/ggplot2-archive.csv', row.names = FALSE)
+```
+
+```{r}
+# CRAN archive table for 'XML'
+XML <- clean_archive(read_archive('XML'))
+XML
+write.csv(XML, file = '../data/xml-archive.csv', row.names = FALSE)
+```
+
+```{r}
+# CRAN archive table for 'knitr'
+knitr <- clean_archive(read_archive('knitr'))
+knitr
+write.csv(knitr, file = '../data/knitr-archive.csv', row.names = FALSE)
+```
+
+```{r}
+# CRAN archive table for 'dplyr'
+dplyr <- clean_archive(read_archive('dplyr'))
+dplyr
+write.csv(dplyr, file = '../data/dplyr-archive.csv', row.names = FALSE)
+```
+
+####Plot All Packages in One Frame
+```{r}
+combined <- rbind(dplyr, ggplot2, knitr, XML)
+ggplot(data=combined, aes(x=date, y=size, group = name, colour = name)) +
+    geom_step() +
+  labs(x = 'Date', y = 'Size (Kilobytes)', title = 'Plot of All Packages in One Frame')
+```
+
+
+```{r}
+combined <- rbind(dplyr, ggplot2, knitr, XML)
+ggplot(data = combined) +
+    labs(x = 'Date', y = 'Size (Kilobytes)', title = 'Plot one package per facet (with free scales)') +
+    geom_step(aes(x = date, y = size, color = name)) +
+  facet_wrap(~name, scales ='free') +
+  theme(legend.position = 'none')
+```
+
+### 3) Data "Emotion in Text"
+```{r}
+# load data
+dat <- read.csv(file = '../data/text-emotion.csv', stringsAsFactors = FALSE)
+head(dat, n=10)
+```
+
+#### 3.1) Count the Number of Characters Per Tweet
+```{r}
+content_char_count <- nchar(dat$content)
+
+# summary for the count of characters in tweet content
+summary(content_char_count)
+
+ggplot(data = as.data.frame(content_char_count), aes(x = content_char_count), col= 'black') + 
+    geom_histogram(binwidth = 5, color = 'blue') + 
+  labs(x = 'tweets', y = 'count of characters', title = 'Plot of Number of Characters Per Tweet')
+
+```
+
+#### 3.2) Number of Mentions
+
+```{r}
+# count the number of hashtags in the tweet contents
+row_id <- str_extract_all(dat$content, '\\@\\w+')
+count_id <- rep(0)
+for (i in 1:length(dat$content)) {
+  if(sum(nchar(row_id[[i]]) <= 16 & nchar(row_id[[i]]) != 0) >= 1) {
+    count_id[i] <- length(row_id[[i]])
+  } else {
+    count_id[i] <- 0
+  }
+}
+
+# table of summary (display of frequency)
+table(count_id)
+
+# barplot of the counts
+barplot(table(count_id), main = 'Frequency of Mentions', xlab = 'Number of @ Per Tweet', ylab = 'Number of Tweets')
+
+# display the content of the tweet with ten mentions
+vec_fac<- as.factor(count_id)
+vec_string <- paste(vec_fac, sep = ' ')
+dat$content[str_which(vec_string, '10')]
+```
+
+#### 3.3) Hashtags
+
+```{r}
+# number of elements containing '#'
+a <- str_extract_all(dat$content, '(#[a-zA-Z]+[a-zA-Z0-9]*)')
+count_hashtag <- rep(0)
+for (i in 1:length(dat$content)) {
+  if(length(a[[i]]) >= 1) {
+    count_hashtag[i] <- length(a[[i]])
+  } else {
+    count_hashtag[i] <- 0
+  }
+}
+
+# table of summary (display of frequency)
+table(count_hashtag)
+
+# barplot of frequency
+barplot(table(count_hashtag), main = 'Frequency of Hashtags', xlab = 'Number of # Per Tweet', ylab = 'Number of Tweets')
+
+# average length of the hashtags
+hashtags <- unlist(
+  lapply(a, function(y) if (length(y) == 0) NULL else y [[1]])
+)
+hash_length <- str_count(hashtags) - 1
+summary(hash_length)
+# from the summary, the average length of hashtags is 7.714
+
+
+# the most common length (i.e. the mode) of the hashtags
+table(hash_length)
+# from the table, the most common length of the hashtags is 4
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
